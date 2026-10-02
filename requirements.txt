@@ -1,0 +1,9 @@
+# Python 3.10 or newer. Install using: python -m pip install -r requirements.txt
+# Java dependency: a JDK (java and javac) and a SAT4J core JAR are also required.
+# Supply the JAR with --sat4j-jar; Java dependencies are not installed by pip.
+# The core runtime is validated with EvoX 1.3.0 and supports CPU and CUDA devices.
+torch>=2.6.0,<3.0
+numpy>=2.0.0,<3.0
+evox==1.3.0
+# Only required when running the included unit tests.
+pytest>=7.0,<10.0
