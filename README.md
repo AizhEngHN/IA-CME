@@ -14,6 +14,7 @@ This is a source-code release. It includes the IA-CME runner, its supporting Pyt
 - [1. Repository structure](#1-repository-structure)
 - [2. Requirements and installation](#2-requirements-and-installation)
 - [3. Input files](#3-input-files)
+  - [Data sources](#33-data-sources)
 - [4. Running IA-CME](#4-running-ia-cme)
 - [5. Small input example](#5-small-input-example)
 - [6. Command-line parameters](#6-command-line-parameters)
@@ -252,6 +253,47 @@ Repeated interaction lines are deduplicated by the parser. Do not rely on duplic
 The runner infers `t` from the input; there is no separate `--t` argument. It does not enumerate all valid interactions from the feature model. To evaluate complete `t`-wise coverage, supply the complete valid set. If you supply a subset, the reported percentage is coverage of that subset.
 
 The pipeline checks interaction consistency and range, but does not independently pre-solve every interaction before pool construction. Supplying invalid interactions can prevent support qualification or cause replenishment to fail.
+
+### 3.3 Data sources
+
+The feature models in the accompanying study are drawn from established SPL-testing benchmarks. A public source of feature models and supplied interaction sets is the repository released with the following work:
+
+> Yi Xiang, Han Huang, Sizhe Li, Miqing Li, Chuan Luo, and Xiaowei Yang. **Automated Test Suite Generation for Software Product Lines Based on Quality-Diversity Optimization.** ACM Transactions on Software Engineering and Methodology, 33(2), Article 46, 2024. [DOI: 10.1145/3628158](https://doi.org/10.1145/3628158).
+
+- **Original repository:** [SPLTestingMAP](https://github.com/gzhuxiangyi/SPLTestingMAP).
+- **Model and interaction directory:** [all_FM/Selected](https://github.com/gzhuxiangyi/SPLTestingMAP/tree/c9befe9fd9e09b637cd98f2513b1dfbbef20855e/all_FM/Selected).
+- **Original-study supplementary materials and raw results:** [Zenodo record 7805017, version v1](https://zenodo.org/records/7805017). This record contains materials for Xiang et al.'s study, not IA-CME experiment results.
+
+The directory link above uses upstream commit `c9befe9fd9e09b637cd98f2513b1dfbbef20855e`, inspected on 2026-10-02. To obtain that source snapshot with Git:
+
+```text
+git clone https://github.com/gzhuxiangyi/SPLTestingMAP.git SPLTestingMAP-data
+git -C SPLTestingMAP-data checkout c9befe9fd9e09b637cd98f2513b1dfbbef20855e
+```
+
+Alternatively, use GitHub's **Code > Download ZIP** option to obtain the current branch. Record the downloaded revision and retain checksums of the input files used in your runs.
+
+Under `all_FM/Selected`, matching inputs use these naming conventions:
+
+| Upstream filename | IA-CME argument | Content |
+| --- | --- | --- |
+| `<model>.dimacs` | `--model` | Feature-model constraints in DIMACS CNF. |
+| `<model>.dimacs.valid2-Set` | `--interactions` | Supplied valid 2-wise interactions. |
+| `<model>.dimacs.valid3-Set` | `--interactions` | Supplied valid 3-wise interactions, where available. |
+
+The filename extension does not need to be changed: the IA-CME runner accepts a DIMACS model named `.dimacs` and a semicolon-separated interaction file named `.valid2-Set` or `.valid3-Set` directly. Keep each interaction file paired with its corresponding model so that feature identifiers agree.
+
+For example, after obtaining the source snapshot, run the `Printers` model using its supplied pairwise set:
+
+```text
+python run_iacme.py --model SPLTestingMAP-data/all_FM/Selected/Printers.dimacs --interactions SPLTestingMAP-data/all_FM/Selected/Printers.dimacs.valid2-Set --sat4j-jar dependencies/sat4j-core.jar --output results/Printers_seed0.json --device cpu --seed 0
+```
+
+This is a usage example, not a reported IA-CME benchmark result. The external JAR and Python dependencies are still required.
+
+The accompanying evaluation uses 56 feature models with supplied 2-wise sets and ten models with supplied 3-wise sets. The upstream repository contains a broader collection; select the subjects listed in the paper for paper-specific comparisons. Coverage is measured over the supplied sets, some of which are capped. Preserve those sets when comparing coverage values rather than replacing them with newly enumerated interaction universes.
+
+This IA-CME release distributes code and documentation rather than copies of the upstream dataset. Retain the original data attribution and consult the upstream distribution terms before redistributing its files.
 
 ## 4. Running IA-CME
 
